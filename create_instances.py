@@ -11,7 +11,8 @@ IMAGE_ID = 'ami-70f96e40'
 KEY_NAME = 'anze'
 INSTANCE_TYPE = 't1.micro'
 SECURITY_GROUPS = ['quicklaunch-1']
-N_INSTANCES = int(sys.argv[1]) if len(sys.argv) > 1 else 1
+STUDENTS = open('students.txt', 'r').read().strip().split('\n')
+N_INSTANCES = len(STUDENTS)
 
 KEY_FILE = '%s.pem' % KEY_NAME
 assert os.path.exists(KEY_FILE), "Key %s does not exist." % KEY_FILE
@@ -42,6 +43,10 @@ reservation = conn.run_instances(
   max_count=N_INSTANCES)
 
 print reservation.instances, 'created'
+
+for instance, student in zip(reservation.instances, STUDENTS):
+    print "Assigning", instance, "to", student
+    instance.add_tag('Name', student)
 
 saltchars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 def salt(): return random.choice(saltchars) + random.choice(saltchars)
@@ -86,11 +91,13 @@ while len(configured_instances) != len(reservation.instances):
     create_users.write('\n\n')
     configured_instances.add(instance.id)
 
+    credentials.write(instance.tags["Name"])
+    credentials.write('\n')
     credentials.write("IP: %s\n" % instance.ip_address)
     credentials.write("username: %s\n" % username)
     credentials.write("password: %s\n" % password)
     credentials.write("ssh %s@%s" % (username, instance.ip_address))
-    credentials.write("\n")
+    credentials.write("\n\n\n")
     
   if not pending_instances:
     break
