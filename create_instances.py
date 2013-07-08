@@ -75,11 +75,13 @@ while len(configured_instances) != len(reservation.instances):
     create_users.write('\n')
     create_users.write('echo "Enabling password authentication"\n')
     create_users.write(' '.join(
-      ['ssh', '-i', KEY_FILE, 'ubuntu@%s' % instance.ip_address,
+      ['ssh',  '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no',
+       '-i', KEY_FILE, 'ubuntu@%s' % instance.ip_address,
        "\"sudo sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config\""]))
     create_users.write('\n')
     create_users.write(' '.join(
-      ['ssh', '-i', KEY_FILE, 'ubuntu@%s' % instance.ip_address,
+      ['ssh',  '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no',
+       '-i', KEY_FILE, 'ubuntu@%s' % instance.ip_address,
        'sudo service ssh reload']))
     create_users.write('\n\n')
     configured_instances.add(instance.id)
